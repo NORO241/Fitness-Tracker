@@ -685,11 +685,7 @@ window.storage = {
     // Poll periodically so the other person's entries show up without a manual refresh.
     // Only refresh the read-only history/streak section — never touch the active
     // entry fields, so it doesn't interrupt whatever you're currently logging.
-    setInterval(() => {
-      if (Storage.configured()) { renderHistory(); renderStreaks(); pingSync(); }
-    }, 8000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) loadDay(); });
-  }
 
   if (Storage.configured()) init(); else { renderPersonToggle(); pingSync(); }
 })();
