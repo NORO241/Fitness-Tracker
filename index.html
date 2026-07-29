@@ -687,7 +687,7 @@ window.storage = {
     // entry fields, so it doesn't interrupt whatever you're currently logging.
     setInterval(() => {
       if (Storage.configured()) { renderHistory(); renderStreaks(); pingSync(); }
-    }, 8000);
+    } );
     document.addEventListener('visibilitychange', () => { if (!document.hidden) loadDay(); });
   }
 
