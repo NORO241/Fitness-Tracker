@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Two-a-Day — Accountability Log</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="theme-color" content="#c08a3e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+  :root{
+    --ink:#14171c;
+    --ink-2:#1c2129;
+    --steel:#2a313b;
+    --steel-2:#343d48;
+    --paper:#ece7dd;
+    --paper-dim:#a9a49a;
+    --brass:#c08a3e;
+    --brass-dim:#8a6530;
+    --rust:#a15b45;
+    --sage:#7a9c78;
+    --sage-dim:#4d6350;
+    --line:#3a4048;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+
+  header{margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--brass);margin-bottom:6px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(28px,5vw,42px);
+    letter-spacing:.01em;margin:0 0 4px;text-transform:uppercase;
+  }
+  .sub{color:var(--paper-dim);font-size:14px;}
+  .gear{
+    background:var(--steel);border:1px solid var(--line);color:var(--paper-dim);
+    width:38px;height:38px;border-radius:50%;font-size:16px;cursor:pointer;flex-shrink:0;
+  }
+  .gear:hover{color:var(--brass);border-color:var(--brass-dim);}
+
+  .topbar{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+    margin:22px 0 18px;padding:14px 16px;background:var(--ink-2);
+    border:1px solid var(--line);border-radius:4px;
+  }
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-dim);font-family:'IBM Plex Mono',monospace;}
+  input[type=date]{
+    background:var(--steel);border:1px solid var(--line);color:var(--paper);
+    padding:7px 9px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px;
+  }
+  .person-toggle{display:flex;gap:6px;}
+  .person-btn{
+    background:var(--steel);border:1px solid var(--line);color:var(--paper-dim);
+    padding:8px 16px;border-radius:3px;font-family:'Oswald',sans-serif;font-weight:600;
+    font-size:13px;letter-spacing:.03em;cursor:pointer;text-transform:uppercase;transition:.15s;
+  }
+  .person-btn.active{background:var(--brass);border-color:var(--brass);color:var(--ink);}
+  .person-btn:hover:not(.active){border-color:var(--brass-dim);color:var(--paper);}
+
+  .streaks{display:flex;gap:18px;}
+  .streak{text-align:right;}
+  .streak .n{font-family:'Oswald',sans-serif;font-weight:700;font-size:26px;color:var(--brass);line-height:1;}
+  .streak .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-dim);font-family:'IBM Plex Mono',monospace;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--ink-2);border:1px solid var(--line);border-radius:4px;
+    padding:16px 18px;position:relative;overflow:hidden;
+  }
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
+  .card-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.03em;}
+  .card-val{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--paper-dim);}
+  .card-val b{color:var(--paper);font-size:15px;}
+
+  .plates{display:flex;gap:3px;height:22px;margin-bottom:12px;}
+  .plate{flex:1;background:var(--steel);border-radius:2px;transition:background .2s;}
+  .plate.filled{background:var(--brass);}
+  .plate.filled.over{background:var(--sage);}
+
+  .quick-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .qbtn{
+    background:var(--steel);border:1px solid var(--line);color:var(--paper);
+    padding:6px 11px;border-radius:20px;font-size:12px;font-family:'IBM Plex Mono',monospace;
+    cursor:pointer;transition:.15s;
+  }
+  .qbtn:hover{border-color:var(--brass);color:var(--brass);}
+  .qbtn.minus{color:var(--rust);}
+  .manual-row{display:flex;gap:8px;align-items:center;}
+  .manual-row input[type=number]{
+    width:90px;background:var(--steel);border:1px solid var(--line);color:var(--paper);
+    padding:6px 9px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px;
+  }
+  .manual-row span{font-size:11px;color:var(--paper-dim);}
+  .goal-edit{font-size:10px;color:var(--paper-dim);cursor:pointer;text-decoration:underline dotted;background:none;border:none;font-family:'IBM Plex Mono',monospace;padding:0;}
+
+  .workout-types{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .wtype{
+    background:var(--steel);border:1px solid var(--line);color:var(--paper-dim);
+    padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+  }
+  .wtype.active{background:var(--rust);border-color:var(--rust);color:var(--paper);}
+  .dur-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .dur-row input[type=range]{flex:1;accent-color:var(--brass);}
+  .dur-row .dur-val{font-family:'IBM Plex Mono',monospace;font-size:13px;min-width:52px;text-align:right;}
+  .done-toggle{
+    display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;
+    padding:8px 10px;border:1px dashed var(--line);border-radius:3px;
+  }
+  .done-toggle.on{border-color:var(--sage);background:rgba(122,156,120,.08);}
+  .checkbox{width:16px;height:16px;border:1px solid var(--paper-dim);border-radius:3px;flex-shrink:0;position:relative;}
+  .done-toggle.on .checkbox{background:var(--sage);border-color:var(--sage);}
+  .done-toggle.on .checkbox::after{content:'';position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .done-toggle span{font-size:13px;}
+
+  .meal-list{display:flex;flex-direction:column;gap:6px;}
+  .meal-item{
+    display:flex;align-items:center;gap:9px;padding:7px 9px;
+    border:1px solid var(--line);border-radius:3px;cursor:pointer;background:var(--ink);
+  }
+  .meal-item.on{border-color:var(--sage);background:rgba(122,156,120,.08);}
+  .meal-item .checkbox{width:15px;height:15px;}
+  .meal-item.on .checkbox{background:var(--sage);border-color:var(--sage);}
+  .meal-item.on .checkbox::after{content:'';position:absolute;left:3px;top:0px;width:4px;height:8px;border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg);}
+  .meal-item span{font-size:13px;}
+
+  .misc-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .misc-field{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;}
+  .misc-field label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-dim);font-family:'IBM Plex Mono',monospace;}
+  .misc-field input, .misc-field textarea{
+    background:var(--steel);border:1px solid var(--line);color:var(--paper);
+    padding:8px 10px;border-radius:3px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;
+  }
+  .misc-field textarea{resize:vertical;min-height:44px;}
+
+  .history{margin-top:22px;}
+  .history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .history-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:var(--paper-dim);}
+  .hist-row{
+    display:grid;grid-template-columns:70px 1fr 1fr 1fr 1fr 1fr;gap:10px;align-items:center;
+    padding:9px 12px;border-bottom:1px solid var(--line);font-size:12px;font-family:'IBM Plex Mono',monospace;
+  }
+  .hist-row.head{color:var(--paper-dim);font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--brass-dim);}
+  .hist-date{color:var(--paper);}
+  .tag{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+  .tag.hit{background:var(--sage);}
+  .tag.miss{background:var(--rust);}
+  @media(max-width:640px){.hist-row{grid-template-columns:56px 1fr 1fr;font-size:11px;} .hist-row span.dur-only{display:none;}}
+
+  .history-body-scroll{
+    max-height:340px;
+    overflow-y:auto;
+    border:1px solid var(--line);
+    border-radius:4px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .history-body-scroll::-webkit-scrollbar{width:6px;}
+  .history-body-scroll::-webkit-scrollbar-track{background:var(--ink-2);}
+  .history-body-scroll::-webkit-scrollbar-thumb{background:var(--brass-dim);border-radius:3px;}
+  .history-body-scroll .hist-row:last-child{border-bottom:none;}
+
+  .save-note{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--paper-dim);
+    text-align:center;margin-top:18px;opacity:0;transition:opacity .3s;
+  }
+  .save-note.show{opacity:1;}
+
+  .sync-pill{
+    display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;
+    font-size:10px;color:var(--paper-dim);letter-spacing:.05em;text-transform:uppercase;
+  }
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--paper-dim);}
+  .sync-dot.ok{background:var(--sage);}
+  .sync-dot.off{background:var(--rust);}
+
+  footer{margin-top:30px;text-align:center;font-size:11px;color:var(--paper-dim);font-family:'IBM Plex Mono',monospace;}
+
+  /* ---------- Setup overlay ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,12,15,.92);z-index:50;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .overlay.hidden{display:none;}
+  .setup-card{
+    background:var(--ink-2);border:1px solid var(--line);border-radius:6px;
+    padding:24px;max-width:440px;width:100%;
+  }
+  .setup-card h2{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:20px;margin:0 0 8px;}
+  .setup-card p{font-size:13px;color:var(--paper-dim);line-height:1.5;margin:0 0 14px;}
+  .setup-card input{
+    width:100%;background:var(--steel);border:1px solid var(--line);color:var(--paper);
+    padding:10px 12px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:13px;margin-bottom:10px;
+  }
+  .setup-card .primary{
+    width:100%;background:var(--brass);border:none;color:var(--ink);
+    padding:11px;border-radius:3px;font-family:'Oswald',sans-serif;font-weight:600;
+    font-size:14px;text-transform:uppercase;cursor:pointer;letter-spacing:.03em;
+  }
+  .setup-card .primary:hover{background:#d29a4c;}
+  .setup-card a{color:var(--brass);}
+  .setup-card .skip{
+    display:block;text-align:center;margin-top:10px;font-size:11px;color:var(--paper-dim);
+    text-decoration:underline dotted;cursor:pointer;background:none;border:none;font-family:'IBM Plex Mono',monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="setupOverlay">
+  <div class="setup-card">
+    <h2>Connect sync</h2>
+    <p>Paste your Firebase Realtime Database URL to sync entries between phones. See the README in this app's folder for the 5-minute setup. Looks like: <code>https://your-project-default-rtdb.firebaseio.com</code></p>
+    <input type="text" id="fbUrlInput" placeholder="https://your-project-default-rtdb.firebaseio.com">
+    <button class="primary" id="fbUrlSave">Save & continue</button>
+    <button class="skip" id="fbSkip">Use offline on this device only (no sync)</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">Daily Log · Shared</div>
+      <h1>Two-a-Day</h1>
+      <div class="sub">Water, protein, training, meals — logged together, missed together.</div>
+    </div>
+    <button class="gear" id="gearBtn" title="Sync settings">⚙</button>
+  </header>
+
+  <div class="topbar">
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="dateInput">
+    </div>
+    <div class="field">
+      <label>Logging as</label>
+      <div class="person-toggle" id="personToggle"></div>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <div class="sync-pill"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">checking…</span></div>
+    </div>
+    <div class="streaks">
+      <div class="streak"><div class="n" id="streakA">0</div><div class="l" id="streakALabel">—</div></div>
+      <div class="streak"><div class="n" id="streakB">0</div><div class="l" id="streakBLabel">—</div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Water</div>
+        <div class="card-val"><b id="waterVal">0</b> / <span id="waterGoalDisp">3000</span> ml</div>
+      </div>
+      <div class="plates" id="waterPlates"></div>
+      <div class="quick-row">
+        <button class="qbtn" data-water="250">+250 ml</button>
+        <button class="qbtn" data-water="500">+500 ml</button>
+        <button class="qbtn minus" data-water="-250">−250 ml</button>
+        <button class="goal-edit" id="editWaterGoal">edit goal</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Protein</div>
+        <div class="card-val"><b id="proteinVal">0</b> / <span id="proteinGoalDisp">150</span> g</div>
+      </div>
+      <div class="plates" id="proteinPlates"></div>
+      <div class="quick-row">
+        <button class="qbtn" data-protein="25">+25g whey</button>
+        <button class="qbtn" data-protein="20">+20g eggs</button>
+        <button class="qbtn" data-protein="30">+30g chicken/paneer</button>
+        <button class="qbtn minus" data-protein="-10">−10g</button>
+      </div>
+      <div class="manual-row">
+        <input type="number" id="proteinManual" placeholder="0">
+        <span>add custom grams</span>
+        <button class="qbtn" id="proteinManualAdd">add</button>
+        <button class="goal-edit" id="editProteinGoal" style="margin-left:auto;">edit goal</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Sleep</div>
+        <div class="card-val"><b id="sleepVal">0</b> / <span id="sleepGoalDisp">7</span> hrs</div>
+      </div>
+      <div class="plates" id="sleepPlates"></div>
+      <div class="quick-row">
+        <button class="qbtn" data-sleep="0.5">+30 min</button>
+        <button class="qbtn" data-sleep="1">+1 hr</button>
+        <button class="qbtn minus" data-sleep="-0.5">−30 min</button>
+        <button class="goal-edit" id="editSleepGoal">edit goal</button>
+      </div>
+      <div class="dur-row">
+        <input type="range" id="sleepSlider" min="0" max="12" step="0.5" value="0">
+        <span class="dur-val" id="sleepLive">0 hrs</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Workout</div>
+        <div class="card-val" id="workoutDurDisp">0 min</div>
+      </div>
+      <div class="workout-types" id="workoutTypes">
+        <div class="wtype" data-type="Push">Push</div>
+        <div class="wtype" data-type="Pull">Pull</div>
+        <div class="wtype" data-type="Legs">Legs</div>
+        <div class="wtype" data-type="Upper">Upper</div>
+        <div class="wtype" data-type="Lower">Lower</div>
+        <div class="wtype" data-type="Cardio">Cardio</div>
+        <div class="wtype" data-type="Rest">Rest day</div>
+      </div>
+      <div class="dur-row">
+        <input type="range" id="durSlider" min="0" max="150" step="5" value="0">
+        <span class="dur-val" id="durLive">0 min</span>
+      </div>
+      <div class="done-toggle" id="workoutDone">
+        <div class="checkbox"></div>
+        <span>Session completed</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Meals logged</div>
+        <div class="card-val"><b id="mealsVal">0</b> / 4</div>
+      </div>
+      <div class="meal-list" id="mealList">
+        <div class="meal-item" data-meal="Breakfast"><div class="checkbox"></div><span>Breakfast</span></div>
+        <div class="meal-item" data-meal="Lunch"><div class="checkbox"></div><span>Lunch</span></div>
+        <div class="meal-item" data-meal="Dinner"><div class="checkbox"></div><span>Dinner</span></div>
+        <div class="meal-item" data-meal="Snacks"><div class="checkbox"></div><span>Snacks / extras</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="misc-row">
+      <div class="misc-field">
+        <label>Body weight (kg, optional)</label>
+        <input type="number" step="0.1" id="weightInput" placeholder="e.g. 78.4">
+      </div>
+      <div class="misc-field" style="flex:2;">
+        <label>Notes</label>
+        <textarea id="notesInput" placeholder="Sleep, soreness, cravings, whatever's worth remembering..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-note" id="saveNote">Saved ✓</div>
+
+  <div class="history">
+    <div class="history-head">
+      <div class="history-title">Last 7 Days</div>
+    </div>
+    <div class="hist-row head">
+      <span>Date</span><span id="histNameA">P1</span><span id="histNameB">P2</span><span class="dur-only">Water A/B</span><span class="dur-only">Protein A/B</span><span class="dur-only">Sleep A/B</span>
+    </div>
+    <div class="history-body-scroll">
+      <div id="historyBody"></div>
+    </div>
+  </div>
+
+  <footer>Installed as an app · fetches latest data on open</footer>
+</div>
+
+<script>
+// ---------- PWA install / offline shell ----------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+
+// ---------- Storage shim: Firebase Realtime Database over REST ----------
+// Mimics the same get/set(key, value, shared) shape used by the tracker logic,
+// so the rest of the app code is unchanged from the Claude artifact version.
+const LS_URL_KEY = 'two_a_day_fb_url';
+
+function sanitizeKey(key){ return key.replace(/[.#$\[\]]/g, '_'); }
+
+const Storage = {
+  baseUrl: localStorage.getItem(LS_URL_KEY) || '',
+
+  configured(){ return !!this.baseUrl; },
+
+  async get(key){
+    if (!this.baseUrl) return null;
+    const path = sanitizeKey(key);
+    const res = await fetch(`${this.baseUrl}/data/${path}.json`);
+    if (!res.ok) throw new Error('fetch failed');
+    const val = await res.json();
+    if (val === null || val === undefined) return null;
+    return { key, value: val };
+  },
+
+  async set(key, value){
+    if (!this.baseUrl) return null;
+    const path = sanitizeKey(key);
+    const res = await fetch(`${this.baseUrl}/data/${path}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value)
+    });
+    if (!res.ok) throw new Error('save failed');
+    return { key, value };
+  }
+};
+
+// Adapter so existing tracker logic (window.storage.get/set(key, value)) keeps working.
+// Values passed in are already JSON strings, so this is a direct pass-through.
+window.storage = {
+  get: (key) => Storage.get(key),
+  set: (key, value) => Storage.set(key, value)
+};
+
+(async function(){
+  const $ = id => document.getElementById(id);
+
+  // ---------- Setup overlay ----------
+  const overlay = $('setupOverlay');
+  function checkSetup(){
+    if (Storage.configured()) overlay.classList.add('hidden');
+    else overlay.classList.remove('hidden');
+  }
+  checkSetup();
+  $('fbUrlSave').onclick = () => {
+    let v = $('fbUrlInput').value.trim().replace(/\/$/, '');
+    if (v) {
+      localStorage.setItem(LS_URL_KEY, v);
+      Storage.baseUrl = v;
+      overlay.classList.add('hidden');
+      init();
+    }
+  };
+  $('fbSkip').onclick = () => { overlay.classList.add('hidden'); init(); };
+  $('gearBtn').onclick = () => {
+    $('fbUrlInput').value = Storage.baseUrl;
+    overlay.classList.remove('hidden');
+  };
+
+  // ---------- Sync status pill ----------
+  async function pingSync(){
+    if (!Storage.configured()){
+      $('syncDot').className = 'sync-dot off';
+      $('syncLabel').textContent = 'local only';
+      return;
+    }
+    try {
+      await Storage.get('__ping__');
+      $('syncDot').className = 'sync-dot ok';
+      $('syncLabel').textContent = 'synced';
+    } catch(e){
+      $('syncDot').className = 'sync-dot off';
+      $('syncLabel').textContent = 'offline';
+    }
+  }
+
+  // ---------- People setup ----------
+  let people = ['Aditya', 'Arushi'];
+  let currentPerson = people[0];
+  let goals = { water: 3000, protein: 150, sleep: 7 };
+
+  function renderPersonToggle(){
+    const el = $('personToggle');
+    el.innerHTML = '';
+    people.forEach(p => {
+      const b = document.createElement('button');
+      b.className = 'person-btn' + (p === currentPerson ? ' active' : '');
+      b.textContent = p;
+      b.onclick = () => { currentPerson = p; renderPersonToggle(); loadDay(); };
+      el.appendChild(b);
+    });
+  }
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  let entry = { water:0, protein:0, sleep:0, workoutType:null, workoutDur:0, workoutDone:false, meals:[], weight:'', notes:'' };
+  let saveTimer = null;
+
+  function keyFor(date, person){ return `log_${date}_${person}`; }
+
+  async function loadDay(){
+    const date = $('dateInput').value;
+    entry = { water:0, protein:0, sleep:0, workoutType:null, workoutDur:0, workoutDone:false, meals:[], weight:'', notes:'' };
+    try {
+      const r = await window.storage.get(keyFor(date, currentPerson));
+      if (r && r.value) entry = Object.assign(entry, JSON.parse(r.value));
+    } catch(e) {}
+    renderEntry();
+    renderHistory();
+    renderStreaks();
+    pingSync();
+  }
+
+  function renderPlates(containerId, val, goal){
+    const el = $(containerId);
+    el.innerHTML = '';
+    const total = 10;
+    const filled = Math.min(total, Math.round((val/goal)*total));
+    const over = val >= goal;
+    for(let i=0;i<total;i++){
+      const d = document.createElement('div');
+      d.className = 'plate' + (i < filled ? ' filled' : '') + (i < filled && over ? ' over' : '');
+      el.appendChild(d);
+    }
+  }
+
+  function renderEntry(){
+    $('waterVal').textContent = entry.water;
+    $('waterGoalDisp').textContent = goals.water;
+    renderPlates('waterPlates', entry.water, goals.water);
+
+    $('proteinVal').textContent = entry.protein;
+    $('proteinGoalDisp').textContent = goals.protein;
+    renderPlates('proteinPlates', entry.protein, goals.protein);
+
+    $('sleepVal').textContent = entry.sleep;
+    $('sleepGoalDisp').textContent = goals.sleep;
+    renderPlates('sleepPlates', entry.sleep, goals.sleep);
+    $('sleepSlider').value = entry.sleep || 0;
+    $('sleepLive').textContent = (entry.sleep||0) + ' hrs';
+
+    document.querySelectorAll('.wtype').forEach(w => {
+      w.classList.toggle('active', w.dataset.type === entry.workoutType);
+    });
+    $('durSlider').value = entry.workoutDur || 0;
+    $('durLive').textContent = (entry.workoutDur||0) + ' min';
+    $('workoutDurDisp').textContent = (entry.workoutDur||0) + ' min';
+    $('workoutDone').classList.toggle('on', !!entry.workoutDone);
+
+    document.querySelectorAll('.meal-item').forEach(m => {
+      m.classList.toggle('on', entry.meals.includes(m.dataset.meal));
+    });
+    $('mealsVal').textContent = entry.meals.length;
+
+    $('weightInput').value = entry.weight || '';
+    $('notesInput').value = entry.notes || '';
+  }
+
+  async function persist(){
+    const date = $('dateInput').value;
+    try {
+      await window.storage.set(keyFor(date, currentPerson), JSON.stringify(entry));
+      const note = $('saveNote');
+      note.classList.add('show');
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=>note.classList.remove('show'), 900);
+      renderHistory();
+      renderStreaks();
+      pingSync();
+    } catch(e) { console.error('save failed', e); $('syncDot').className='sync-dot off'; $('syncLabel').textContent='save failed'; }
+  }
+
+  document.querySelectorAll('[data-water]').forEach(b=>{
+    b.onclick = () => { entry.water = Math.max(0, entry.water + parseInt(b.dataset.water)); renderEntry(); persist(); };
+  });
+  document.querySelectorAll('[data-protein]').forEach(b=>{
+    b.onclick = () => { entry.protein = Math.max(0, entry.protein + parseInt(b.dataset.protein)); renderEntry(); persist(); };
+  });
+  $('proteinManualAdd').onclick = () => {
+    const v = parseInt($('proteinManual').value) || 0;
+    if (v) { entry.protein = Math.max(0, entry.protein + v); renderEntry(); persist(); }
+    $('proteinManual').value = '';
+  };
+  document.querySelectorAll('[data-sleep]').forEach(b=>{
+    b.onclick = () => { entry.sleep = Math.max(0, Math.round((entry.sleep + parseFloat(b.dataset.sleep))*2)/2); renderEntry(); persist(); };
+  });
+  $('sleepSlider').oninput = (e) => { entry.sleep = parseFloat(e.target.value); $('sleepLive').textContent = entry.sleep + ' hrs'; };
+  $('sleepSlider').onchange = () => { renderEntry(); persist(); };
+  $('editSleepGoal').onclick = async () => {
+    const v = prompt('Daily sleep goal (hrs):', goals.sleep);
+    if (v && !isNaN(v)) { goals.sleep = parseFloat(v); await window.storage.set('goals', JSON.stringify(goals)); renderEntry(); }
+  };
+
+  document.querySelectorAll('.wtype').forEach(w=>{
+    w.onclick = () => { entry.workoutType = (entry.workoutType === w.dataset.type) ? null : w.dataset.type; renderEntry(); persist(); };
+  });
+  $('durSlider').oninput = (e) => {
+    entry.workoutDur = parseInt(e.target.value);
+    $('durLive').textContent = entry.workoutDur + ' min';
+    $('workoutDurDisp').textContent = entry.workoutDur + ' min';
+  };
+  $('durSlider').onchange = () => persist();
+  $('workoutDone').onclick = () => { entry.workoutDone = !entry.workoutDone; renderEntry(); persist(); };
+  document.querySelectorAll('.meal-item').forEach(m=>{
+    m.onclick = () => {
+      const meal = m.dataset.meal;
+      const idx = entry.meals.indexOf(meal);
+      if (idx >= 0) entry.meals.splice(idx,1); else entry.meals.push(meal);
+      renderEntry(); persist();
+    };
+  });
+  $('weightInput').addEventListener('change', () => { entry.weight = $('weightInput').value; persist(); });
+  $('notesInput').addEventListener('blur', () => { entry.notes = $('notesInput').value; persist(); });
+
+  $('editWaterGoal').onclick = async () => {
+    const v = prompt('Daily water goal (ml):', goals.water);
+    if (v && !isNaN(v)) { goals.water = parseInt(v); await window.storage.set('goals', JSON.stringify(goals)); renderEntry(); }
+  };
+  $('editProteinGoal').onclick = async () => {
+    const v = prompt('Daily protein goal (g):', goals.protein);
+    if (v && !isNaN(v)) { goals.protein = parseInt(v); await window.storage.set('goals', JSON.stringify(goals)); renderEntry(); }
+  };
+
+  function dateNDaysAgo(n){
+    const d = new Date($('dateInput').value + 'T00:00:00');
+    d.setDate(d.getDate() - n);
+    return d.toISOString().slice(0,10);
+  }
+
+  async function renderHistory(){
+    const body = $('historyBody');
+    body.innerHTML = '';
+    for (let i=0; i<7; i++){
+      const date = dateNDaysAgo(i);
+      let eA = null, eB = null;
+      try { const r = await window.storage.get(keyFor(date, people[0])); if(r&&r.value) eA = JSON.parse(r.value); } catch(e){}
+      try { const r = await window.storage.get(keyFor(date, people[1])); if(r&&r.value) eB = JSON.parse(r.value); } catch(e){}
+
+      const row = document.createElement('div');
+      row.className = 'hist-row';
+      const hitA = eA && (eA.water>=goals.water) && (eA.protein>=goals.protein) && eA.workoutDone;
+      const hitB = eB && (eB.water>=goals.water) && (eB.protein>=goals.protein) && eB.workoutDone;
+      const d = new Date(date+'T00:00:00');
+      const label = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+
+      row.innerHTML = `
+        <span class="hist-date">${label}</span>
+        <span><span class="tag ${eA ? (hitA?'hit':'miss') : ''}" style="${eA?'':'display:none'}"></span>${eA ? (eA.workoutDone ? (eA.workoutType||'Trained') : '—') : 'No log'}</span>
+        <span><span class="tag ${eB ? (hitB?'hit':'miss') : ''}" style="${eB?'':'display:none'}"></span>${eB ? (eB.workoutDone ? (eB.workoutType||'Trained') : '—') : 'No log'}</span>
+        <span class="dur-only">${eA?eA.water:0}/${eB?eB.water:0} ml</span>
+        <span class="dur-only">${eA?eA.protein:0}/${eB?eB.protein:0} g</span>
+        <span class="dur-only">${eA?eA.sleep:0}/${eB?eB.sleep:0} hrs</span>
+      `;
+      body.appendChild(row);
+    }
+  }
+
+  async function computeStreak(person){
+    let streak = 0;
+    for (let i=0; i<365; i++){
+      const date = dateNDaysAgo(i);
+      let e = null;
+      try { const r = await window.storage.get(keyFor(date, person)); if(r&&r.value) e = JSON.parse(r.value); } catch(err){}
+      if (e && e.water>=goals.water && e.protein>=goals.protein && e.workoutDone){ streak++; }
+      else if (i===0 && !e) { continue; }
+      else { break; }
+    }
+    return streak;
+  }
+
+  async function renderStreaks(){
+    $('streakA').textContent = await computeStreak(people[0]);
+    $('streakB').textContent = await computeStreak(people[1]);
+  }
+
+  async function init(){
+    try {
+      const rp = await window.storage.get('people');
+      if (rp && rp.value) people = JSON.parse(rp.value);
+    } catch(e){}
+    currentPerson = people[0];
+    try {
+      const rg = await window.storage.get('goals');
+      if (rg && rg.value) goals = JSON.parse(rg.value);
+    } catch(e){}
+
+    $('streakALabel').textContent = people[0] + ' streak';
+    $('streakBLabel').textContent = people[1] + ' streak';
+    $('histNameA').textContent = people[0];
+    $('histNameB').textContent = people[1];
+    renderPersonToggle();
+
+    $('dateInput').value = todayStr();
+    $('dateInput').addEventListener('change', loadDay);
+
+    loadDay();
+
+    // Fetch once on load only — no periodic polling.
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) loadDay(); });
+  }
+
+  if (Storage.configured()) init(); else { renderPersonToggle(); pingSync(); }
+})();
+</script>
+</body>
+</html>
