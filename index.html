@@ -368,7 +368,7 @@
     <div id="historyBody"></div>
   </div>
 
-  <footer>Installed as an app · syncs every few seconds when online</footer>
+  <footer>Installed as an app · fetches latest data on open</footer>
 </div>
 
 <script>
@@ -682,10 +682,9 @@ window.storage = {
 
     loadDay();
 
-    // Poll periodically so the other person's entries show up without a manual refresh.
-    // Only refresh the read-only history/streak section — never touch the active
-    // entry fields, so it doesn't interrupt whatever you're currently logging.
+    // Fetch once on load only — no periodic polling.
     document.addEventListener('visibilitychange', () => { if (!document.hidden) loadDay(); });
+  }
 
   if (Storage.configured()) init(); else { renderPersonToggle(); pingSync(); }
 })();
